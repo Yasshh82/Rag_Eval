@@ -8,3 +8,9 @@ wheels/
 
 # Virtual environments
 .venv
+
+#environment variables
+.env
+
+# vector store
+/chroma_store
