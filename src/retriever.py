@@ -59,5 +59,3 @@ if __name__ == "__main__":
     for r in results:
         print(f"[Session {r.metadata['session']}] {r.page_content[:150]}...\n")
 
-
-# models/gemini-embedding-001
