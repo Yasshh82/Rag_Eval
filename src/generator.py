@@ -68,15 +68,11 @@ Rules:
 
 
 <COURSE_CONTEXT>
-
 {context}
-
 </COURSE_CONTEXT>
 
 <STUDENT_QUESTION>
-
 {question}
-
 </STUDENT_QUESTION>
 
 Answer:
@@ -90,6 +86,12 @@ def generate(query: str, context: list[str]) -> str:
     context_text = "\n\n".join(context)
     return chain.invoke({"question": query, "context": context_text})
 
+def generate_stream(query: str, context: list[str]):
+    context_text = "\n\n".join(context)
+    for chunk in chain.stream({"question": query, "context": context_text}):
+        if chunk:
+            yield chunk
+
 
 # quick manual test: python src/generator.py
 if __name__ == "__main__":
@@ -99,3 +101,8 @@ if __name__ == "__main__":
         "after deployment. It works without an answer key, unlike offline eval."
     ]
     print(generate("what is online eval?", ctx))
+
+    print("\n--- streaming ---")
+    for piece in generate_stream("what is online eval?", ctx):
+        print(piece, end="", flush=True)
+    print()
