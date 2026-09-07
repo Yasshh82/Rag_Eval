@@ -365,7 +365,9 @@ def run_toxicity(rag, verbose=True):
     goldens = load_goldens(TOXICITY_GOLDEN_PATH)
 
     test_cases = []
-    for g in goldens:
+    for i, g in enumerate(goldens):
+        print(f"Processing toxicity question {i+1}/{len(goldens)}...")
+        time.sleep(5)
         result = rag.invoke(g["input"])             # retrieve -> rerank -> generate
         test_cases.append(
             LLMTestCase(

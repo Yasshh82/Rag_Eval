@@ -17,6 +17,7 @@ from deepeval.metrics import (
 )
 
 from src.rag_pipeline import RagPipeline
+from evals.harness import load_goldens, summarize_by_metric, print_summary
 
 load_dotenv()
 
@@ -27,7 +28,7 @@ class RateLimited(GeminiModel):
         for attempt in range(max_retries):
             try:
                 # Sleep for 8 seconds to respect the 15 RPM limit
-                time.sleep(8)
+                time.sleep(5)
                 return super().generate(*args, **kwargs)
             except Exception as e:
                 # If Google's servers crash (503) or we hit a random rate limit (429)
@@ -57,53 +58,57 @@ class RateLimited(GeminiModel):
     
 
 GOLDEN_PATH = "goldens/faithfulness_dataset.json"
-JUDGE_MODEL_FAITHFULL = "gemini-3.1-flash-lite"
-JUDGE_MODEL_RELEVANCE = "gemini-3.5-flash-lite"
-JUDGE_MODEL_CONTEXTUAL = "gemini-3.5-flash-lite"
+# JUDGE_MODEL_FAITHFULL = "gemini-3.1-flash-lite"
+# JUDGE_MODEL_RELEVANCE = "gemini-3.5-flash-lite"
+# JUDGE_MODEL_CONTEXTUAL = "gemini-3.5-flash-lite"
+JUDGE_MODEL = "gemini-3.1-flash-lite"
 THRESHOLD = 0.7
 
-judge_faithfull = RateLimited(model=JUDGE_MODEL_FAITHFULL)
-judge_relevance = RateLimited(model=JUDGE_MODEL_RELEVANCE)
-judge_contextual = RateLimited(model=JUDGE_MODEL_CONTEXTUAL)
+judge_model = RateLimited(model=JUDGE_MODEL)
+# judge_faithfull = RateLimited(model=JUDGE_MODEL_FAITHFULL)
+# judge_relevance = RateLimited(model=JUDGE_MODEL_RELEVANCE)
+# judge_contextual = RateLimited(model=JUDGE_MODEL_CONTEXTUAL)
 
 
-with open(GOLDEN_PATH) as f:
-    goldens = json.load(f)
+def run(rag):
+    # with open(GOLDEN_PATH) as f:
+    #     goldens = json.load(f)
+    goldens = load_goldens(GOLDEN_PATH)
 
 
-rag = RagPipeline()
-test_cases = []
-for i, g in enumerate(goldens):
-    print(f"Processing question {i+1}/{len(goldens)}...")
+    # rag = RagPipeline()
+    test_cases = []
+    for i, g in enumerate(goldens):
+        print(f"Processing question {i+1}/{len(goldens)}...")
+        time.sleep(5)
 
-    time.sleep(8)
-    result = rag.invoke(g["query"])
+        result = rag.invoke(g["query"])
 
-    test_cases.append(
-        LLMTestCase(
-            input=g["query"],
-            actual_output=result["answer"],
-            retrieval_context=result["context"],
+        test_cases.append(
+            LLMTestCase(
+                input=g["query"],
+                actual_output=result["answer"],
+                retrieval_context=result["context"],
+            )
         )
+
+
+    metrics = [
+        ContextualRelevancyMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
+        FaithfulnessMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
+        AnswerRelevancyMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
+    ]
+
+    result = evaluate(
+        test_cases=test_cases,
+        metrics=metrics,
+        async_config=AsyncConfig(run_async=False),
     )
+    return summarize_by_metric(result)
 
 
-metrics = [
-    ContextualRelevancyMetric(threshold=THRESHOLD, model=judge_contextual, include_reason=True, async_mode=False),
-    FaithfulnessMetric(threshold=THRESHOLD, model=judge_faithfull, include_reason=True, async_mode=False),
-    AnswerRelevancyMetric(threshold=THRESHOLD, model=judge_relevance, include_reason=True, async_mode=False),
-]
+def run_local():
+    return run(RagPipeline())
 
-evaluate(
-    test_cases=test_cases,
-    metrics=metrics,
-    # use_cache=False,
-    async_config=AsyncConfig(run_async=False),
-    hyperparameters={
-        "top_k": 5,
-        "judge_model_faithfull": JUDGE_MODEL_FAITHFULL,
-        "judge_model_relevance": JUDGE_MODEL_RELEVANCE,
-        "judge_model_contextual": JUDGE_MODEL_CONTEXTUAL,
-        "golden_set": GOLDEN_PATH,
-    }
-)
+if __name__ == "__main__":
+    print_summary("rag_pipeline", run_local())
