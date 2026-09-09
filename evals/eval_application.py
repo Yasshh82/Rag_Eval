@@ -55,15 +55,15 @@ class RateLimited(GeminiModel):
     
 
 GOLDEN_PATH = "goldens/correctness_goldens.json"
-# JUDGE_MODEL_CORRECTNESS = "gemini-3.1-flash-lite"
-# JUDGE_MODEL_COMPLETENESS = "gemini-3.5-flash-lite"
-# JUDGE_MODEL_STYLE = "gemini-3.5-flash-lite"
+JUDGE_MODEL_CORRECTNESS = "gemini-3.1-flash-lite"
+JUDGE_MODEL_COMPLETENESS = "gemini-3.5-flash-lite"
+JUDGE_MODEL_STYLE = "gemini-3.5-flash-lite"
 JUDGE_MODEL = "gemini-3.1-flash-lite"
 THRESHOLD = 0.7
 
-# judge_correctness = RateLimited(model=JUDGE_MODEL_CORRECTNESS)
-# judge_completeness = RateLimited(model=JUDGE_MODEL_COMPLETENESS)
-# judge_style = RateLimited(model=JUDGE_MODEL_STYLE)
+judge_correctness = RateLimited(model=JUDGE_MODEL_CORRECTNESS)
+judge_completeness = RateLimited(model=JUDGE_MODEL_COMPLETENESS)
+judge_style = RateLimited(model=JUDGE_MODEL_STYLE)
 judge_model = RateLimited(model=JUDGE_MODEL)
 
 
@@ -103,7 +103,7 @@ def run(rag):
         ],
         evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
         threshold=THRESHOLD,
-        model=judge_model,
+        model=judge_correctness,
         strict_mode=False,
         async_mode=False,
     )
@@ -125,7 +125,7 @@ def run(rag):
         ],
         evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.EXPECTED_OUTPUT],
         threshold=THRESHOLD,
-        model=judge_model,
+        model=judge_completeness,
         strict_mode=False,
         async_mode=False
     )
@@ -149,7 +149,7 @@ def run(rag):
         ],
         evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
         threshold=THRESHOLD,
-        model=judge_model,
+        model=judge_style,
         strict_mode=False,
         async_mode=False,
     )

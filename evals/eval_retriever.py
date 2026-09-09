@@ -19,8 +19,8 @@ class RateLimited(GeminiModel):
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                # Sleep for 8 seconds to respect the 15 RPM limit
-                time.sleep(8)
+                # Sleep for 5 seconds to respect the 15 RPM limit
+                time.sleep(5)
                 return super().generate(*args, **kwargs)
             except Exception as e:
                 # If Google's servers crash (503) or we hit a random rate limit (429)
@@ -37,7 +37,7 @@ class RateLimited(GeminiModel):
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                await asyncio.sleep(8)
+                await asyncio.sleep(5)
                 return await super().a_generate(*args, **kwargs)
             except Exception as e:
                 if "503" in str(e) or "429" in str(e):
@@ -49,12 +49,12 @@ class RateLimited(GeminiModel):
                     raise e
 
 GOLDEN_PATH = "goldens/retriever_goldens.json"
-JUDGE_MODEL = "gemini-3.1-flash-lite"
-# JUDGE_MODEL_PRECISION = "gemini-3.5-flash-lite"
+JUDGE_MODEL_RECALL = "gemini-3.1-flash-lite"
+JUDGE_MODEL_PRECISION = "gemini-3.5-flash-lite"
 THRESHOLD = 0.7
 
-judge_model = RateLimited(model=JUDGE_MODEL)
-# judge_precision = RateLimited(model=JUDGE_MODEL_PRECISION)
+judge_recall = RateLimited(model=JUDGE_MODEL_RECALL)
+judge_precision = RateLimited(model=JUDGE_MODEL_PRECISION)
 
 def run(retriever):
     # with open(GOLDEN_PATH) as f:
@@ -84,8 +84,8 @@ def run(retriever):
 
 
     metrics = [
-        ContextualRecallMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
-        ContextualPrecisionMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
+        ContextualRecallMetric(threshold=THRESHOLD, model=judge_recall, include_reason=True, async_mode=False),
+        ContextualPrecisionMetric(threshold=THRESHOLD, model=judge_precision, include_reason=True, async_mode=False),
     ]
 
 
@@ -93,15 +93,6 @@ def run(retriever):
         test_cases=test_cases,
         metrics=metrics,
         async_config=AsyncConfig(run_async=False),
-        hyperparameters={
-            "retriever": "reranker",
-            "embedding_model": "all-MiniLM-L6-v2",
-            "chunk_size": 1000,
-            "chunk_overlap": 150,
-            "top_k": 5,
-            "judge_model": JUDGE_MODEL,
-            "golden_set": GOLDEN_PATH,
-        },
     )
     return summarize_by_metric(result)
 

@@ -50,13 +50,13 @@ class RateLimited(GeminiModel):
 
 GOLDEN_PATH = "goldens/faithfulness_dataset.json"
 JUDGE_MODEL = "gemini-3.1-flash-lite"
-# JUDGE_MODEL_FAITHFULL = "gemini-3.1-flash-lite"
-# JUDGE_MODEL_RELEVANCE = "gemini-3.5-flash-lite"
+JUDGE_MODEL_FAITHFULL = "gemini-3.1-flash-lite"
+JUDGE_MODEL_RELEVANCE = "gemini-3.5-flash-lite"
 THRESHOLD = 0.7
 
 judge_model = RateLimited(model=JUDGE_MODEL)
-# judge_faithfull = RateLimited(model=JUDGE_MODEL_FAITHFULL)
-# judge_relevance = RateLimited(model=JUDGE_MODEL_RELEVANCE)
+judge_faithfull = RateLimited(model=JUDGE_MODEL_FAITHFULL)
+judge_relevance = RateLimited(model=JUDGE_MODEL_RELEVANCE)
 
 def run():
     # with open(GOLDEN_PATH) as f:
@@ -82,8 +82,8 @@ def run():
 
 
     metrics = [
-        FaithfulnessMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
-        AnswerRelevancyMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
+        FaithfulnessMetric(threshold=THRESHOLD, model=judge_faithfull, include_reason=True, async_mode=False),
+        AnswerRelevancyMetric(threshold=THRESHOLD, model=judge_relevance, include_reason=True, async_mode=False),
     ]
 
 

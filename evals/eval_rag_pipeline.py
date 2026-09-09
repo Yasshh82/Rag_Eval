@@ -27,7 +27,7 @@ class RateLimited(GeminiModel):
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                # Sleep for 8 seconds to respect the 15 RPM limit
+                # Sleep for 5 seconds to respect the 15 RPM limit
                 time.sleep(5)
                 return super().generate(*args, **kwargs)
             except Exception as e:
@@ -45,7 +45,7 @@ class RateLimited(GeminiModel):
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                await asyncio.sleep(8)
+                await asyncio.sleep(5)
                 return await super().a_generate(*args, **kwargs)
             except Exception as e:
                 if "503" in str(e) or "429" in str(e):
@@ -58,16 +58,16 @@ class RateLimited(GeminiModel):
     
 
 GOLDEN_PATH = "goldens/faithfulness_dataset.json"
-# JUDGE_MODEL_FAITHFULL = "gemini-3.1-flash-lite"
-# JUDGE_MODEL_RELEVANCE = "gemini-3.5-flash-lite"
-# JUDGE_MODEL_CONTEXTUAL = "gemini-3.5-flash-lite"
+JUDGE_MODEL_FAITHFULL = "gemini-3.1-flash-lite"
+JUDGE_MODEL_RELEVANCE = "gemini-3.5-flash-lite"
+JUDGE_MODEL_CONTEXTUAL = "gemini-3.5-flash-lite"
 JUDGE_MODEL = "gemini-3.1-flash-lite"
 THRESHOLD = 0.7
 
 judge_model = RateLimited(model=JUDGE_MODEL)
-# judge_faithfull = RateLimited(model=JUDGE_MODEL_FAITHFULL)
-# judge_relevance = RateLimited(model=JUDGE_MODEL_RELEVANCE)
-# judge_contextual = RateLimited(model=JUDGE_MODEL_CONTEXTUAL)
+judge_faithfull = RateLimited(model=JUDGE_MODEL_FAITHFULL)
+judge_relevance = RateLimited(model=JUDGE_MODEL_RELEVANCE)
+judge_contextual = RateLimited(model=JUDGE_MODEL_CONTEXTUAL)
 
 
 def run(rag):
@@ -94,9 +94,9 @@ def run(rag):
 
 
     metrics = [
-        ContextualRelevancyMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
-        FaithfulnessMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
-        AnswerRelevancyMetric(threshold=THRESHOLD, model=judge_model, include_reason=True, async_mode=False),
+        ContextualRelevancyMetric(threshold=THRESHOLD, model=judge_contextual, include_reason=True, async_mode=False),
+        FaithfulnessMetric(threshold=THRESHOLD, model=judge_faithfull, include_reason=True, async_mode=False),
+        AnswerRelevancyMetric(threshold=THRESHOLD, model=judge_relevance, include_reason=True, async_mode=False),
     ]
 
     result = evaluate(
