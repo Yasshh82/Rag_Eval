@@ -40,7 +40,7 @@ def load_store():
 
     docs = load_transcripts()
 
-    chunks = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150).split_documents(docs)
+    chunks = RecursiveCharacterTextSplitter(chunk_size=1100, chunk_overlap=150).split_documents(docs)
 
     print(f"Number of chunks: {len(chunks)}") # Add this line
     if len(chunks) == 0:
