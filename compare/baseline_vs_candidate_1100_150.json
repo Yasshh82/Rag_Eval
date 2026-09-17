@@ -1,0 +1,89 @@
+{
+  "baseline_file": "baselines/baseline.json",
+  "candidate_file": "baselines/candidate_1100_150.json",
+  "summary": {
+    "overall": "The candidate improves answer quality and faithfulness, but regresses on latency, retrieval precision/recall, and one leakage metric.",
+    "improved_metrics": [
+      "application.completeness_[geval].avg_score",
+      "generator.answer_relevancy.avg_score",
+      "pipeline.answer_relevancy.avg_score",
+      "pipeline.faithfulness.avg_score",
+      "safety.scope.avg_score"
+    ],
+    "regressed_metrics": [
+      "application.style_[geval].avg_score",
+      "ops.latency.e2e_p95_ms",
+      "pipeline.contextual_relevancy.avg_score",
+      "retriever.contextual_precision.avg_score",
+      "retriever.contextual_recall.avg_score",
+      "safety.leakage.pii_avg_score"
+    ]
+  },
+  "metric_deltas": {
+    "application.completeness_[geval].avg_score": {
+      "baseline": 0.9133333333333333,
+      "candidate": 0.94,
+      "delta": 0.026666666666666727
+    },
+    "application.style_[geval].avg_score": {
+      "baseline": 0.9000000000000001,
+      "candidate": 0.8733333333333334,
+      "delta": -0.026666666666666727
+    },
+    "generator.answer_relevancy.avg_score": {
+      "baseline": 0.7922262922262923,
+      "candidate": 0.8494586894586894,
+      "delta": 0.05723239723239715
+    },
+    "ops.cost.cost_per_query_usd": {
+      "baseline": 0.0007581875000000001,
+      "candidate": 0.0008024375000000001,
+      "delta": 4.425000000000002e-05
+    },
+    "ops.latency.e2e_p95_ms": {
+      "baseline": 5264.087414974354,
+      "candidate": 13799.583155003349,
+      "delta": 8535.495740028995
+    },
+    "pipeline.answer_relevancy.avg_score": {
+      "baseline": 0.8055555555555556,
+      "candidate": 0.875925925925926,
+      "delta": 0.07037037037037042
+    },
+    "pipeline.contextual_relevancy.avg_score": {
+      "baseline": 0.5848875828906788,
+      "candidate": 0.5538986568986568,
+      "delta": -0.030988925992021965
+    },
+    "pipeline.faithfulness.avg_score": {
+      "baseline": 0.9042592592592593,
+      "candidate": 0.9777777777777777,
+      "delta": 0.07351851851851843
+    },
+    "retriever.contextual_precision.avg_score": {
+      "baseline": 0.7607407407407407,
+      "candidate": 0.7,
+      "delta": -0.06074074074074076
+    },
+    "retriever.contextual_recall.avg_score": {
+      "baseline": 0.8422222222222222,
+      "candidate": 0.8,
+      "delta": -0.04222222222222227
+    },
+    "safety.leakage.pii_avg_score": {
+      "baseline": 0.6,
+      "candidate": 0.4,
+      "delta": -0.19999999999999996
+    },
+    "safety.scope.avg_score": {
+      "baseline": 0.9600000000000001,
+      "candidate": 0.9666666666666667,
+      "delta": 0.006666666666666599
+    },
+    "suite_seconds": {
+      "baseline": 5250.3,
+      "candidate": 9205.8,
+      "delta": 3955.5
+    }
+  }
+}
